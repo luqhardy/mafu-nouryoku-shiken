@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafumafu Lyrics Quiz</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .quiz-container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .option.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .score {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo Section -->
+    <div class="logo">
+        <img src="mafu.png" alt="Mafumafu Logo" style="max-width: 200px; height: auto;">
+    </div>
+
+    <div class="quiz-container">
+        <div class="question" id="question">Loading...</div>
+        <div class="options" id="options"></div>
+    </div>
+
+    <div class="footer">
+        <div class="score" id="score">Score: 0</div>
+        Progress saved locally. Reload the page to start fresh!
+    </div>
+
+    <script>
+        let score = 0;
+
+        async function fetchLyrics() {
+            const response = await fetch('lyrics.json');
+            const data = await response.json();
+            return data;
+        }
+        function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    }
+}
+
+
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const scoreEl = document.getElementById('score');
+
+        async function displayQuestion() {
+    const lyrics = await fetchLyrics();
+    const lyric = lyrics[Math.floor(Math.random() * lyrics.length)];
+
+    // Replace the kanji to emphasize with underlined markup
+    const emphasizedLine = lyric.line.replace(lyric.emphasized, `<u>${lyric.emphasized}</u>`);
+    questionEl.innerHTML = emphasizedLine;
+    optionsEl.innerHTML = '';
+
+    // Shuffle the options
+    const options = [...lyric.options]; // Copy options to avoid modifying original
+    shuffleArray(options);
+
+    // Display shuffled options
+    options.forEach(option => {
+        const button = document.createElement('button');
+        button.className = 'option';
+        button.textContent = option;
+        button.addEventListener('click', () => {
+            if (option === lyric.correct) {
+                button.classList.add('correct');
+                score++;
+                scoreEl.textContent = `Score: ${score}`;
+            } else {
+                button.classList.add('wrong');
+            }
+            setTimeout(() => {
+                displayQuestion();
+            }, 1000);
+        });
+        optionsEl.appendChild(button);
+    });
+}
+
+
+        displayQuestion();
+    </script>
+</body>
+</html>
